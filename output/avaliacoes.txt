@@ -1,0 +1,4 @@
+3
+Avaliacao 1: 0.45
+Avaliacao 2: 0.45
+Avaliacao 3: 0.10
