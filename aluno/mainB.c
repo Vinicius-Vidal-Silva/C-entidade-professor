@@ -9,7 +9,17 @@ typedef struct {
     float p1;
     float p2;
     float media;
-} Estudante;
+    int faltas;
+    char situ[10];
+}Estudante;
+
+typedef struct{
+    char cpf[11];
+    char nome[50];
+    char senha[10];
+    int privilegio;
+    char *materia;
+}membroAcademico;
 
 // Função para ler um registro do arquivo binário
 int LerArquivo(FILE *file, Estudante *aluno) {
@@ -28,7 +38,9 @@ int LerArquivo(FILE *file, Estudante *aluno) {
     aluno->nome[aluno->tamNome] = '\0';  // Adicionar o terminador nulo
     if (fread(&aluno->p1, sizeof(float), 1, file) != 1 ||
         fread(&aluno->p2, sizeof(float), 1, file) != 1 ||
-        fread(&aluno->media, sizeof(float), 1, file) != 1) {
+        fread(&aluno->media, sizeof(float), 1, file) != 1 ||
+        fread(&aluno->faltas, sizeof(int), 1, file) != 1 ||
+        fread(aluno->situ, sizeof(char), 10, file) != 10) {
         free(aluno->nome);
         return 0;
     }
@@ -71,6 +83,48 @@ Estudante* EncontrarDadoPorNome(const char *nomeArquivo, const char *nome) {
     fclose(file); // Fecha o arquivo
     return result; // Retorna dessa função o valor de result
 }
+
+// Função para escrever um registro no arquivo binário
+void EscreverNoArquivo(FILE *file, Estudante *aluno) {
+
+    fwrite(&aluno->tamNome, sizeof(size_t), 1, file);
+    fwrite(aluno->nome, sizeof(char), aluno->tamNome, file);
+    fwrite(&aluno->p1, sizeof(float), 1, file);
+    fwrite(&aluno->p2, sizeof(float), 1, file);
+    fwrite(&aluno->media, sizeof(float), 1, file);
+    fwrite(&aluno->faltas, sizeof(int), 1, file);
+    fwrite(aluno->situ, sizeof(char), 10, file);  // Tamanho fixo de 10 caracteres
+}
+
+// Função para adicionar registros ao arquivo binário
+void FormatarArquivo(const char *filename) {
+
+    FILE *file = fopen(filename, "wb");
+    if (file == NULL) {
+        perror("Erro ao abrir o arquivo");
+        exit(1);
+    }
+
+    Estudante estudantes[10] = {
+        {4, "Joao", 7.5, 8.0, 7.75, 2, "Aprovado"},
+        {5, "Maria", 8.0, 9.0, 8.5, 0, "Aprovado"},
+        {4, "Jose", 6.5, 7.0, 6.75, 3, "Reprovado"},
+        {6, "Pedro", 9.0, 8.5, 8.75, 1, "Aprovado"},
+        {7, "Ana", 7.0, 7.5, 7.25, 0, "Aprovado"},
+        {5, "Luis", 8.5, 8.0, 8.25, 2, "Aprovado"},
+        {4, "Rita", 6.0, 7.0, 6.5, 4, "Reprovado"},
+        {8, "Paula", 9.5, 9.0, 9.25, 0, "Aprovado"},
+        {5, "Carlos", 7.5, 8.5, 8.0, 1, "Aprovado"},
+        {7, "Julia", 8.0, 7.5, 7.75, 2, "Aprovado"}
+    };
+
+    for (int i = 0; i < 10; i++) {
+        EscreverNoArquivo(file, &estudantes[i]);
+    }
+
+    fclose(file);
+}
+
 void MostrarNotas(char *materia, char *nome){
 
     // Atribuindo a uma variável o valor da chamada da função EncontrarDadoPorNome
@@ -89,7 +143,27 @@ void MostrarNotas(char *materia, char *nome){
         printf("Nome '%s' não encontrado no arquivo.\n", nome);
     }
 }
-void Aluno() {
+
+void MostrarFaltas(char *materia, char *nome){
+
+    // Atribuindo a uma variável o valor da chamada da função EncontrarDadoPorNome
+    Estudante *aluno = EncontrarDadoPorNome(materia, nome);
+
+    // Verifica se foi retornado algum valor pela função
+    if (aluno != NULL) {
+
+        // Imprime na tela os dados encontrados a partir da P1
+        printf("Dados encontrados: Faltas = %i, Situação = %s\n", aluno->faltas, aluno->situ);
+        free(aluno->nome); // Libera a memória alocada para o nome
+        free(aluno);  // Liberar a memória alocada para toda a variável aluno
+    } else {
+
+        // Imprime que o nome que queremos não foi encontrado
+        printf("Nome '%s' não encontrado no arquivo.\n", nome);
+    }
+}
+
+void Aluno(membroAcademico aluno) {
 
     int opcao = 0;
 
@@ -112,7 +186,12 @@ void Aluno() {
             getchar();
             break;
         case 2:
-            MostrarNotas("MateriaLP.bin", "Joao");
+            MostrarNotas(aluno.materia, aluno.nome);
+            getchar();
+            getchar();
+            break;
+        case 3:
+            MostrarFaltas(aluno.materia, aluno.nome);
             getchar();
             getchar();
             break;
@@ -129,9 +208,18 @@ void Aluno() {
 
 int main() {
 
+    membroAcademico usuario;
+    strcpy(usuario.cpf, "47246813810");
+    strcpy(usuario.nome, "Joao");
+    strcpy(usuario.senha, "senha1");
+    usuario.privilegio = 3;
+    usuario.materia = "MateriaLP.bin";
+
     // Aqui ficaria o menu principal começando pelo Login
     // E utilizando do privilegio no switch case pra acessar as funcoes
-    Aluno();
+    Aluno(usuario);
+
+    //FormatarArquivo("MateriaLP.bin");
 
     // Fim do código
     system("Pause");
