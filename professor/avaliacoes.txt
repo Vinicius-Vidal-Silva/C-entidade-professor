@@ -1,3 +1,2 @@
-2
-Avaliacao 1: 0.55
-Avaliacao 2: 0.45
+Avaliacao 1: 0.70
+Avaliacao 2: 0.30

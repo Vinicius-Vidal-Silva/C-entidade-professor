@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <string.h> // manipula??o de string
 #include <stdlib.h> // limpar terminal e pausa no sistema
+#include <ctype.h> // inclui a função de mudar minúscula
+
 int materia();
 
 int presenca();
@@ -262,28 +264,10 @@ int preencherNotas(){
     }while(sair == 0);
  return 0;
 }
-//função para exibir a ajuda
-void exibirAjuda() {
-    printf("\n**************************************\n");
-    printf("Ajuda do Programa:\n");
-    printf("1 - Definir avaliacoes: Permite definir os criterios de avaliacao.\n");
-    printf("	1.1 - Avaliações: Define a quantida de avaliações que desejar.\n");
-    printf("		1.1.1 - Peso*: Escolha o peso que deseja para as avaliacoes.\n");
-    printf("	1.2 - Alterar avaliações: Altera as avaliações existentes");
-	printf("	*Obs.: Por padrao os pesos sao definidos como 1.\n");
-    printf("2 - Atribuir notas: Permite atribuir notas aos alunos.\n");
-    printf("3 - Realizar chamada: Permite fazer a chamada dos alunos.\n");
-    printf("4 - Fechamento da materia: Permite realizar o fechamento da materia.\n");
-    printf("5 - Sair: Encerra o programa.\n");
-    printf("A qualquer momento, digite '/ajuda' para exibir esta mensagem.\n");
-	printf("**************************************\n");
-	system("echo \"Pressione qualquer tecla para continuar...\"");
-}
 
 //função para editar avaliações existentes
 void definirAvaliacoes() {
-    // Abre o arquivo de avaliações
-    FILE *file = fopen("avaliacoes.txt", "r+");
+	FILE *file = fopen("avaliacoes.txt", "r+");
     if (!file) {
         // Se o arquivo não existir, cria o arquivo
         file = fopen("avaliacoes.txt", "w+");
@@ -304,259 +288,169 @@ void definirAvaliacoes() {
 
     // Confere se o arquivo está vazio
     if (file_size == 0) {
-        char definir_pesos;
-        char entrada[100];
-        int num_avaliacoes = 2;
-        float peso1, peso2;
-
-        // Loop para definir os pesos das avaliações
-        
-        printf("Avaliacoes P1 e P2 definidas com sucesso.\n");
-        printf("Deseja definir pesos para as avaliacoes? (S/N): ");
-        scanf("%c", &definir_pesos);
-        /*
-		while (1) {
-        	printf("2 avaliações definidas com sucesso\n");
-            printf("Deseja definir pesos para as avaliacoes? (S/N): ");
-            fgets(entrada, sizeof(entrada), stdin);
-            entrada[strcspn(entrada, "\n")] = 0;
-
-            if (strcmp(entrada, "/ajuda") == 0) {
-                exibirAjuda();
-                continue;
-            }
-
-            definir_pesos = entrada[0];
-            if (definir_pesos == 'S' || definir_pesos == 's' || definir_pesos == 'N' || definir_pesos == 'n') break;
-
-            printf("Entrada inválida. Tente novamente.\n");
-        }
-		*/
-        // Começa a escrever no arquivo
-        fprintf(file, "%d\n", num_avaliacoes);
-        if (definir_pesos == 'S' || definir_pesos == 's') {
-            // Entrada de pesos que devem somar 1
-            while (1) {
-                printf("Defina o peso da avaliacao 1: ");
-                fgets(entrada, sizeof(entrada), stdin);
-                entrada[strcspn(entrada, "\n")] = 0;
-
-                if (strcmp(entrada, "/ajuda") == 0) {
-                    exibirAjuda();
-                    continue;
-                }
-
-                peso1 = atof(entrada);
-                if (peso1 > 0 && peso1 < 1) break;
-
-                printf("Entrada inválida. O peso deve ser maior que 0 e menor que 1. Tente novamente.\n");
-            }
-
-            while (1) {
-                printf("Defina o peso da avaliacao 2: ");
-                fgets(entrada, sizeof(entrada), stdin);
-                entrada[strcspn(entrada, "\n")] = 0;
-
-                if (strcmp(entrada, "/ajuda") == 0) {
-                    exibirAjuda();
-                    continue;
-                }
-
-                peso2 = atof(entrada);
-                if (peso2 > 0 && (peso1 + peso2 == 1)) break;
-
-                printf("Entrada inválida. A soma dos pesos das avaliacoes deve ser 1. Tente novamente.\n");
-            }
-
-            fprintf(file, "Avaliacao 1: %.2f\n", peso1);
-            fprintf(file, "Avaliacao 2: %.2f\n", peso2);
-        } else {
-            // Caso não deseje definir pesos, usa o peso padrão 0.5 para cada avaliação
-            fprintf(file, "Avaliacao 1: 0.5\n");
-            fprintf(file, "Avaliacao 2: 0.5\n");
-        }
-        printf("Avaliacoes definidas com sucesso!\n");
-    } else {
-        // Arquivo não está vazio, exibir e perguntar se deseja alterar
-        rewind(file);
-        char linha[100];
-        printf("Avaliacoes definidas:\n");
-        while (fgets(linha, sizeof(linha), file)) {
-            printf("%s", linha);
-        }
-
-        char alterar;
-
-        while (1) {
-            printf("Deseja alterar as avaliacoes? (S/N): ");
-            fgets(linha, sizeof(linha), stdin);
-            linha[strcspn(linha, "\n")] = 0;
-
-            if (strcmp(linha, "/ajuda") == 0) {
-                exibirAjuda();
-                continue;
-            }
-
-            alterar = linha[0];
-            if (alterar == 'S' || alterar == 's' || alterar == 'N' || alterar == 'n') break;
+		char escolher_peso;
+		float peso1, peso2;
+		float pesos = 1.0;
+		
+	    printf("De acordo com o Regimento interno e institucional, toda matéria deve possuir 2 notas.\n");
+	    printf("Duas notas definidas com sucesso.\n");
+	    
+	    do{
+	    	printf("Deseja definir peso para as notas? (S/N)\n");
+	    	scanf("%c", &escolher_peso);
+	    	fflush(stdin);
+		}while(tolower(escolher_peso) != 's' && tolower(escolher_peso) != 'n');
+	    
+	    do{
+		    if(tolower(escolher_peso) == 's'){
+		    	printf("Entre com o peso da primeira nota: ");
+		    	scanf("%f", &peso1);
+		    	fflush(stdin);	
+				
+				if(peso1 > 1){
+					printf("O valor do peso precisa estar entre 0 e 1.\n");
+				}
+				
+				peso2 = pesos - peso1; 		
+				
+				printf("Avaliacoes definidas com sucesso!\n");
+				fprintf(file, "Avaliacao 1: %.2f\n", peso1);
+        		fprintf(file, "Avaliacao 2: %.2f\n", peso2);
+        		
+			}else{
+				// Caso não deseje definir pesos, usa o peso padrão 0.5 para cada avaliação
+				printf("Avaliacoes definidas com sucesso!\n");
+				fprintf(file, "Avaliacao 1: 0.5\n");
+    			fprintf(file, "Avaliacao 2: 0.5\n");
+			}
+			
+		}while(peso1 > 1);
+			printf("Opa");
+	}else {
+		// Arquivo não está vazio, exibir e perguntar se deseja alterar
+	    rewind(file);
+	    char alterar;
+	    char linha[100];
+	    float peso1, peso2;
+	    printf("Avaliacoes definidas:\n");
+	    //escreve a linha do arquivo na tela
+		while (fgets(linha, sizeof(linha), file)) {
+	    	printf("%s", linha);
+   		}
+		
+		while(1){
+			printf("Deseja alterar as avaliacoes? (S/N)\n");
+			scanf("%c", &alterar);
+			fflush(stdin);
+		    
+			if (tolower(alterar) == 's' || tolower(alterar) == 'n'){
+				break;	
+			} 
 
             printf("Entrada inválida. Tente novamente.\n");
-        }
-
-        if (alterar == 'S' || alterar == 's') {
+    	}
+    	//resposta para sim
+    	if (tolower(alterar) == 's') {
             freopen("avaliacoes.txt", "w+", file);
-            char definir_pesos;
+            char escolher_pesos;
             char entrada[100];
             int num_avaliacoes = 2;
+            int pesos = 1;
             float peso1, peso2;
-
-            while (1) {
-                printf("Deseja definir pesos para as avaliacoes? (S/N): ");
-                fgets(entrada, sizeof(entrada), stdin);
-                entrada[strcspn(entrada, "\n")] = 0;
-
-                if (strcmp(entrada, "/ajuda") == 0) {
-                    exibirAjuda();
-                    continue;
-                }
-
-                definir_pesos = entrada[0];
-                if (definir_pesos == 'S' || definir_pesos == 's' || definir_pesos == 'N' || definir_pesos == 'n') break;
-
-                printf("Entrada inválida. Tente novamente.\n");
-            }
-
-            fprintf(file, "%d\n", num_avaliacoes);
-            if (definir_pesos == 'S' || definir_pesos == 's') {
-                while (1) {
-                    printf("Defina o peso da avaliacao 1: ");
-                    fgets(entrada, sizeof(entrada), stdin);
-                    entrada[strcspn(entrada, "\n")] = 0;
-
-                    if (strcmp(entrada, "/ajuda") == 0) {
-                        exibirAjuda();
-                        continue;
-                    }
-
-                    peso1 = atof(entrada);
-                    if (peso1 > 0 && peso1 < 1) break;
-
-                    printf("Entrada inválida. O peso deve ser maior que 0 e menor que 1. Tente novamente.\n");
-                }
-
-                while (1) {
-                    printf("Defina o peso da avaliacao 2: ");
-                    fgets(entrada, sizeof(entrada), stdin);
-                    entrada[strcspn(entrada, "\n")] = 0;
-
-                    if (strcmp(entrada, "/ajuda") == 0) {
-                        exibirAjuda();
-                        continue;
-                    }
-
-                    peso2 = atof(entrada);
-                    if (peso2 > 0 && (peso1 + peso2 == 1)) break;
-
-                    printf("Entrada inválida. A soma dos pesos das avaliacoes deve ser 1. Tente novamente.\n");
-                }
-
-                fprintf(file, "Avaliacao 1: %.2f\n", peso1);
-                fprintf(file, "Avaliacao 2: %.2f\n", peso2);
-            } else {
-                fprintf(file, "Avaliacao 1: 0.5\n");
-                fprintf(file, "Avaliacao 2: 0.5\n");
-            }
-            printf("Avaliacoes redefinidas com sucesso!\n");
-        } else {
-            printf("Manter as avaliacoes atuais.\n");
-        }
-    }
-
-    fclose(file);
-    printf("Pressione qualquer tecla para continuar...");
-    getchar();
+    		
+			do{
+	    		printf("Deseja definir peso para as notas? (S/N)\n");
+	    		scanf("%c", &escolher_pesos);
+	    		fflush(stdin);
+			}while(tolower(escolher_pesos) != 's' && tolower(escolher_pesos) != 'n');
+			
+			do{
+			    if(tolower(escolher_pesos) == 's'){
+			    	printf("Entre com o peso da primeira nota: ");
+			    	scanf("%f", &peso1);
+			    	fflush(stdin);	
+					
+					if(peso1 > 1){
+						printf("O valor do peso precisa estar entre 0 e 1.\n");
+					}
+					
+					peso2 = pesos - peso1; 		
+					printf("Avaliacoes definidas com sucesso!\n");
+					fprintf(file, "Avaliacao 1: %.2f\n", peso1);
+	        		fprintf(file, "Avaliacao 2: %.2f\n", peso2);
+	        		
+				}else{
+					// Caso não deseje definir pesos, usa o peso padrão 0.5 para cada avaliação
+					printf("Avaliacoes definidas com sucesso!\n");
+					fprintf(file, "Avaliacao 1: 0.5\n");
+	    			fprintf(file, "Avaliacao 2: 0.5\n");
+				}	
+			}while(peso1 > 1);
+    	}
+	}
 }
 
+//função para editar avaliação
 void editarAvaliacoes() {
-    //abre o arquivo de avaliações
-    FILE *file = fopen("avaliacoes.txt", "r+");
-    if (!file) {
-        printf("Nenhuma avaliacao definida.\n");
-        system("echo \"Pressione qualquer tecla para continuar\"");
-        return; // Sai da função se o arquivo não existir
-    }
-
-    // Exibe as avaliações existentes
-    rewind(file);
-    char linha[100];
-    printf("Avaliacoes definidas:\n");
-    while (fgets(linha, sizeof(linha), file)) {
-        printf("%s", linha);
-    }
-
-    // Pergunta se o usuário deseja alterar os pesos
+	FILE *file = fopen("avaliacoes.txt", "r+");
+	// altera o arquivo existente
+	rewind(file);
     char alterar;
-    while (1) {
-        printf("Deseja alterar os pesos das avaliacoes? (S/N): ");
-        fgets(linha, sizeof(linha), stdin);
-        linha[strcspn(linha, "\n")] = 0;
+    char linha[100];
+    float peso1, peso2;
+    printf("Avaliacoes definidas:\n");
+    //escreve a linha do arquivo na tela
+	while (fgets(linha, sizeof(linha), file)) {
+    	printf("%s", linha);
+	}
+	
+	while(1){
+		printf("Deseja alterar as avaliacoes? (S/N)\n");
+		scanf("%c", &alterar);
+		fflush(stdin);
+	    
+		if (tolower(alterar) == 's' || tolower(alterar) == 'n'){
+			break;	
+		} 
 
-        if (strcmp(linha, "/ajuda") == 0) {
-            exibirAjuda();
-            continue;
-        }
-
-        alterar = linha[0];
-        if (alterar == 'S' || alterar == 's' || alterar == 'N' || alterar == 'n') break;
-
-        printf("Entrada invalida. Tente novamente.\n");
-    }
-
-    if (alterar == 'S' || alterar == 's') {
-        // Usuário deseja alterar os pesos
+        printf("Entrada inválida. Tente novamente.\n");
+	}
+	//resposta para sim
+	if (tolower(alterar) == 's') {
+        freopen("avaliacoes.txt", "w+", file);
+        char escolher_pesos;
+        char entrada[100];
+        int num_avaliacoes = 2;
+        int pesos = 1;
         float peso1, peso2;
-
-        // Loop para obter os pesos válidos do usuário
-        while (1) {
-            char entrada[100];
-
-            // Obter o peso da primeira avaliação
-            while (1) {
-                printf("Defina o peso da Avaliacao 1 (entre 0 e 1): ");
-                fgets(entrada, sizeof(entrada), stdin);
-                entrada[strcspn(entrada, "\n")] = 0;
-
-                if (strcmp(entrada, "/ajuda") == 0) {
-                    exibirAjuda();
-                    continue;
-                }
-
-                peso1 = atof(entrada);
-                if (peso1 >= 0 && peso1 <= 1) break; 
-
-                printf("Entrada inválida. O peso deve estar entre 0 e 1.\n");
-            }
-
-            // Calcula o peso da segunda avaliação
-            peso2 = 1 - peso1;
-
-            // Verifica se o peso2 é válido (redundante neste caso, mas útil em geral)
-            if (peso2 >= 0 && peso2 <= 1) break;
-
-            printf("A soma dos pesos deve ser igual a 1. Tente novamente.\n");
-        }
-
-        // Atualiza o arquivo com os novos pesos
-        freopen("avaliacoes.txt", "w", file); // Abre para escrita, sobrescrevendo o conteúdo
-        fprintf(file, "2\n");                // Sempre duas avaliações
-        fprintf(file, "Avaliacao 1: %.2f\n", peso1);
-        fprintf(file, "Avaliacao 2: %.2f\n", peso2);
-
-        printf("Pesos das avaliacoes atualizados com sucesso!\n");
-    } else {
-        printf("Manter os pesos atuais das avaliacoes.\n");
-    }
-
-    fclose(file);
-    system("echo \"Pressione qualquer tecla para continuar\"");
+		
+		do{
+    		printf("Deseja definir peso para as notas? (S/N)\n");
+    		scanf("%c", &escolher_pesos);
+    		fflush(stdin);
+		}while(tolower(escolher_pesos) != 's' && tolower(escolher_pesos) != 'n');
+		
+		do{
+		    if(tolower(escolher_pesos) == 's'){
+		    	printf("Entre com o peso da primeira nota: ");
+		    	scanf("%f", &peso1);
+		    	fflush(stdin);	
+				
+				if(peso1 > 1){
+					printf("O valor do peso precisa estar entre 0 e 1.\n");
+				}
+				
+				peso2 = pesos - peso1; 		
+				printf("Avaliacoes definidas com sucesso!\n");
+				fprintf(file, "Avaliacao 1: %.2f\n", peso1);
+        		fprintf(file, "Avaliacao 2: %.2f\n", peso2);
+        		
+			}else{
+				// Caso não deseje definir pesos, usa o peso padrão 0.5 para cada avaliação
+				printf("Avaliacoes definidas com sucesso!\n");
+				fprintf(file, "Avaliacao 1: 0.5\n");
+    			fprintf(file, "Avaliacao 2: 0.5\n");
+			}	
+		}while(peso1 > 1);
+	}
 }
