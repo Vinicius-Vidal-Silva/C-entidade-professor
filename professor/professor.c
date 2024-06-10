@@ -177,7 +177,7 @@ void RealizarChamada(char *materia) {
         }
 
         printf("Nome: %s, Faltas: %d\n", aluno.nome, aluno.faltas);
-        printf("O aluno este� presente? (1 para sim, 0 para nao): ");
+        printf("O aluno este� presente? (1 para sim, 0 para nao): ");
         scanf("%d", &presente);
 
         if (!presente) {
@@ -197,8 +197,72 @@ void RealizarChamada(char *materia) {
     system("pause");
 }
 
-void FechamentoMateria(){
+void FechamentoMateria() {
+    int opcao;
+    char nomeAluno[50];
+    FILE *file;
+    Estudante aluno;
 
+    printf("Deseja exibir o relatório por:\n1 - Aluno\n2 - Disciplina\n");
+    scanf("%d", &opcao);
+    fflush(stdin);
+
+    if (opcao == 1) {
+        printf("Digite o nome do aluno: ");
+        scanf("%49s", nomeAluno);
+        fflush(stdin);
+
+        file = fopen("MateriaLP.bin", "rb");
+        if (file == NULL) {
+            perror("Erro ao abrir o arquivo");
+            return;
+        }
+
+        int encontrado = 0;
+        while (LerArquivo(file, &aluno)) {
+            if (strcmp(aluno.nome, nomeAluno) == 0) {
+                encontrado = 1;
+                printf("\nAluno encontrado:\n");
+                printf("Nome: %s\n", aluno.nome);
+                printf("P1: %.2f\n", aluno.p1);
+                printf("P2: %.2f\n", aluno.p2);
+                printf("Media: %.2f\n", aluno.media);
+                printf("Faltas: %d\n", aluno.faltas);
+                printf("Situacao: %s\n", aluno.situ);
+                free(aluno.nome);
+                break;
+            }
+            free(aluno.nome);
+        }
+
+        if (!encontrado) {
+            printf("Aluno '%s' não encontrado no arquivo.\n", nomeAluno);
+        }
+
+        fclose(file);
+    } else if (opcao == 2) {
+        file = fopen("MateriaLP.bin", "rb");
+        if (file == NULL) {
+            perror("Erro ao abrir o arquivo");
+            return;
+        }
+
+        printf("Relatório por disciplina:\n");
+
+        while (LerArquivo(file, &aluno)) {
+            printf("\nNome: %s\n", aluno.nome);
+            printf("P1: %.2f\n", aluno.p1);
+            printf("P2: %.2f\n", aluno.p2);
+            printf("Media: %.2f\n", aluno.media);
+            printf("Faltas: %d\n", aluno.faltas);
+            printf("Situacao: %s\n", aluno.situ);
+            free(aluno.nome);
+        }
+
+        fclose(file);
+    } else {
+        printf("Opção inválida.\n");
+    }
 }
 
 void Professor(membroAcademico professor){
@@ -238,12 +302,12 @@ void Professor(membroAcademico professor){
 				getchar();
 				system("cls");
 				break;
-			case 3:
-				printf("Fechamento\n");
-				system("echo \"Pressione qualquer tecla para continuar\"");
-				getchar();
-				system("cls");
-				break;
+            case 3:
+                FechamentoMateria();
+                system("echo \"Pressione qualquer tecla para continuar\"");
+                getchar();
+                system("cls");
+                break;
 			case 4:
 			    while (1) {
                     printf("Deseja realmente sair?\n1 - Sim\n2 - Nao\n");
