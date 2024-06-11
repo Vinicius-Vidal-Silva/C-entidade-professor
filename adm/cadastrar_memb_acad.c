@@ -28,7 +28,7 @@ memb_acad memb_acad_cadastro(){
     printf("Nome:\n");
     scanf(" %[^\n]s", &novo_membro.nome);
     printf("CPF:\n");
-    scanf("%ld", &novo_membro.CPF);
+    scanf("%s", &novo_membro.cpf);
     printf("senha provisória:\n");
     scanf("%s",&novo_membro.senha);
     printf("Privilégio:\n");
@@ -106,7 +106,7 @@ void* cadastrar_membro_acad() {
         exit(1);
     }
 
-    
+
     fwrite(memb_acad_vet, sizeof(memb_acad), cont_cadastro, membros_acad_lst);
     printf("%d", cont_cadastro);
 

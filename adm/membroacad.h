@@ -22,7 +22,7 @@
 struct _memb_acad {
     
     char nome[48];
-    long int CPF;
+    char cpf[12];
     char senha[8];
     int priv;
     //adm = 1, prof = 2, aluno = 3//
