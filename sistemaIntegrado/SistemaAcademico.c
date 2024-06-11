@@ -1,6 +1,6 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <stdio.h>  // Biblioteca padrão para entrada e saída de dados.
+#include <stdlib.h> // Biblioteca padrão para funções de propósito geral, como alocação de memória.
+#include <string.h> // Biblioteca padrão para manipulação de strings.
 
 // Definição da estrutura do registro
 typedef struct
@@ -26,29 +26,61 @@ typedef struct
 // Função para ler um registro do arquivo binário
 int LerArquivo(FILE *file, Estudante *aluno)
 {
-
+    // Lê o tamanho do nome do estudante
     if (fread(&aluno->tamNome, sizeof(size_t), 1, file) != 1)
     {
-        return 0;
+        return 0; // Retorna 0 se a leitura falhar
     }
+
+    // Aloca memória para armazenar o nome do estudante
     aluno->nome = (char *)malloc(aluno->tamNome + 1);
     if (aluno->nome == NULL)
     {
-        return 0;
+        return 0; // Retorna 0 se a alocação de memória falhar
     }
+
+    // Lê o nome do estudante do arquivo
     if (fread(aluno->nome, sizeof(char), aluno->tamNome, file) != aluno->tamNome)
     {
-        free(aluno->nome);
-        return 0;
+        free(aluno->nome); // Libera a memória alocada se a leitura falhar
+        return 0;          // Retorna 0 se a leitura falhar
     }
-    aluno->nome[aluno->tamNome] = '\0'; // Adicionar o terminador nulo
+    aluno->nome[aluno->tamNome] = '\0'; // Adiciona o terminador nulo ao final do nome para indicar o final da string
+
+    // Lê os demais campos do registro do estudante
     if (fread(&aluno->p1, sizeof(float), 1, file) != 1 ||
         fread(&aluno->p2, sizeof(float), 1, file) != 1 ||
         fread(&aluno->media, sizeof(float), 1, file) != 1 ||
         fread(&aluno->faltas, sizeof(int), 1, file) != 1 ||
         fread(aluno->situ, sizeof(char), 10, file) != 10)
     {
-        free(aluno->nome);
+        free(aluno->nome); // Libera a memória alocada se a leitura falhar
+        return 0;          // Retorna 0 se a leitura falhar
+    }
+    return 1; // Retorna 1 se a leitura for bem-sucedida
+}
+
+// Função para ler um registro do arquivo binário
+int LerUsuario(FILE *file, membroAcademico *usuario)
+{
+    if (fread(usuario->cpf, sizeof(char), 12, file) != 12)
+    {
+        return 0;
+    }
+    if (fread(usuario->senha, sizeof(char), 10, file) != 10)
+    {
+        return 0;
+    }
+    if (fread(usuario->nome, sizeof(char), 50, file) != 50)
+    {
+        return 0;
+    }
+    if (fread(&usuario->privilegio, sizeof(int), 1, file) != 1)
+    {
+        return 0;
+    }
+    if (fread(usuario->materia, sizeof(char), 50, file) != 50)
+    {
         return 0;
     }
     return 1;
@@ -97,18 +129,6 @@ Estudante *EncontrarDadoPorNome(const char *nomeArquivo, const char *nome)
 }
 
 // Função para escrever um registro no arquivo binário
-void EscreverNoArquivo(FILE *file, Estudante *aluno)
-{
-
-    fwrite(&aluno->tamNome, sizeof(size_t), 1, file);
-    fwrite(aluno->nome, sizeof(char), aluno->tamNome, file);
-    fwrite(&aluno->p1, sizeof(float), 1, file);
-    fwrite(&aluno->p2, sizeof(float), 1, file);
-    fwrite(&aluno->media, sizeof(float), 1, file);
-    fwrite(&aluno->faltas, sizeof(int), 1, file);
-    fwrite(aluno->situ, sizeof(char), 10, file); // Tamanho fixo de 10 caracteres
-}
-
 void EscreverEstudante(FILE *file, Estudante *aluno)
 {
     fwrite(&aluno->tamNome, sizeof(size_t), 1, file);
@@ -120,10 +140,19 @@ void EscreverEstudante(FILE *file, Estudante *aluno)
     fwrite(aluno->situ, sizeof(char), 10, file); // Tamanho fixo de 10 caracteres
 }
 
-// Função para adicionar registros ao arquivo binário
-void FormatarArquivo(const char *filename)
+// Função para escrever um registro no arquivo binário
+void EscreverUsuario(FILE *file, membroAcademico *usuario)
 {
+    fwrite(usuario->cpf, sizeof(char), 12, file);
+    fwrite(usuario->senha, sizeof(char), 10, file);
+    fwrite(usuario->nome, sizeof(char), 50, file);
+    fwrite(&usuario->privilegio, sizeof(int), 1, file);
+    fwrite(usuario->materia, sizeof(char), 50, file);
+}
 
+// Função para formatar o arquivo com alguns usuários
+void FormatarArquivoLogin(const char *filename)
+{
     FILE *file = fopen(filename, "wb");
     if (file == NULL)
     {
@@ -131,6 +160,30 @@ void FormatarArquivo(const char *filename)
         exit(1);
     }
 
+    membroAcademico usuarios[3] = {
+        {"47735823109", "senha1", "Bruno", 1, "MateriaLP.bin"},
+        {"12345678901", "senha2", "Luciano", 2, "MateriaLP.bin"},
+        {"10987654321", "senha3", "Joao", 3, "MateriaLP.bin"}};
+
+    for (int i = 0; i < 3; i++)
+    {
+        EscreverUsuario(file, &usuarios[i]);
+    }
+
+    fclose(file);
+}
+
+// Função para adicionar registros ao arquivo binário
+void FormatarArquivo(const char *filename)
+{
+    FILE *file = fopen(filename, "wb"); // Abre o arquivo para escrita binária
+    if (file == NULL)
+    {
+        perror("Erro ao abrir o arquivo"); // Mensagem de erro
+        exit(1);                           // Sai do programa se a abertura do arquivo falhar
+    }
+
+    // Cria um array de 10 registros de estudantes
     Estudante estudantes[10] = {
         {4, "Joao", 7.5, 8.0, 7.75, 2, "Aprovado"},
         {5, "Maria", 8.0, 9.0, 8.5, 0, "Aprovado"},
@@ -143,12 +196,39 @@ void FormatarArquivo(const char *filename)
         {5, "Carlos", 7.5, 8.5, 8.0, 1, "Aprovado"},
         {7, "Julia", 8.0, 7.5, 7.75, 2, "Aprovado"}};
 
+    // Escreve os 10 registros no arquivo
     for (int i = 0; i < 10; i++)
     {
-        EscreverNoArquivo(file, &estudantes[i]);
+        EscreverEstudante(file, &estudantes[i]);
+    }
+
+    fclose(file); // Fecha o arquivo
+}
+
+// Função para verificar se o CPF corresponde à senha e retornar o usuário encontrado
+int VerificarCpfSenha(const char *nomeArquivo, const char *cpf, const char *senha, membroAcademico *usuarioEncontrado)
+{
+    FILE *file = fopen(nomeArquivo, "rb");
+    if (file == NULL)
+    {
+        perror("Erro ao abrir o arquivo");
+        return 0;
+    }
+
+    membroAcademico usuario;
+
+    while (LerUsuario(file, &usuario))
+    {
+        if (strcmp(usuario.cpf, cpf) == 0 && strcmp(usuario.senha, senha) == 0)
+        {
+            *usuarioEncontrado = usuario;
+            fclose(file);
+            return 1; // CPF e senha correspondem
+        }
     }
 
     fclose(file);
+    return 0; // CPF e senha não correspondem
 }
 
 void MostrarNotas(char *materia, char *nome)
@@ -195,155 +275,6 @@ void MostrarFaltas(char *materia, char *nome)
         // Imprime que o nome que queremos não foi encontrado
         printf("Nome '%s' não encontrado no arquivo.\n", nome);
     }
-}
-
-void Aluno(membroAcademico aluno)
-{
-
-    int opcao = 0;
-    char escolha;
-
-    do
-    {
-        printf("\n\n--------- Bem vindo %s! ---------\n\n", aluno.nome);
-        printf("--------- Digite a opcao desejada: --------------\n");
-        printf("------------------- 1 - Aviso -------------------\n");
-        printf("------------------- 2 - Notas -------------------\n");
-        printf("------------------- 3 - Faltas ------------------\n");
-        printf("------------------- 4 - Sair --------------------\n");
-        scanf("%i", &opcao);
-
-        switch (opcao)
-        {
-        case 1:
-            printf("Aviso será mostrado aqui!");
-            getchar();
-            getchar();
-            break;
-        case 2:
-            MostrarNotas(aluno.materia, aluno.nome);
-            getchar();
-            getchar();
-            break;
-        case 3:
-            MostrarFaltas(aluno.materia, aluno.nome);
-            getchar();
-            getchar();
-            break;
-        case 4:
-
-            do
-            {
-                printf("Deseja realmente sair\n 1- Sim\n 2- Nao");
-                scanf("%s", &escolha);
-                if (escolha == '2')
-                {
-                    opcao = 0;
-                    printf("Teste");
-                    break;
-                }
-                if (escolha == '1')
-                {
-                    opcao = 4;
-                    break;
-                }
-                printf("Opcao invalida\n");
-            } while (escolha != '1');
-
-            break;
-        default:
-            printf("Opcao Invalida");
-            getchar();
-            getchar();
-            break;
-        }
-        system("cls");
-    } while (opcao != 4);
-}
-
-// Função para ler um registro do arquivo binário
-int LerUsuario(FILE *file, membroAcademico *usuario)
-{
-    if (fread(usuario->cpf, sizeof(char), 12, file) != 12)
-    {
-        return 0;
-    }
-    if (fread(usuario->senha, sizeof(char), 10, file) != 10)
-    {
-        return 0;
-    }
-    if (fread(usuario->nome, sizeof(char), 50, file) != 50)
-    {
-        return 0;
-    }
-    if (fread(&usuario->privilegio, sizeof(int), 1, file) != 1)
-    {
-        return 0;
-    }
-    if (fread(usuario->materia, sizeof(char), 50, file) != 50)
-    {
-        return 0;
-    }
-    return 1;
-}
-
-// Função para verificar se o CPF corresponde à senha e retornar o usuário encontrado
-int VerificarCpfSenha(const char *nomeArquivo, const char *cpf, const char *senha, membroAcademico *usuarioEncontrado)
-{
-    FILE *file = fopen(nomeArquivo, "rb");
-    if (file == NULL)
-    {
-        perror("Erro ao abrir o arquivo");
-        return 0;
-    }
-
-    membroAcademico usuario;
-
-    while (LerUsuario(file, &usuario))
-    {
-        if (strcmp(usuario.cpf, cpf) == 0 && strcmp(usuario.senha, senha) == 0)
-        {
-            *usuarioEncontrado = usuario;
-            fclose(file);
-            return 1; // CPF e senha correspondem
-        }
-    }
-
-    fclose(file);
-    return 0; // CPF e senha não correspondem
-}
-
-// Função para escrever um registro no arquivo binário
-void EscreverUsuario(FILE *file, membroAcademico *usuario)
-{
-    fwrite(usuario->cpf, sizeof(char), 12, file);
-    fwrite(usuario->senha, sizeof(char), 10, file);
-    fwrite(usuario->nome, sizeof(char), 50, file);
-    fwrite(&usuario->privilegio, sizeof(int), 1, file);
-    fwrite(usuario->materia, sizeof(char), 50, file);
-}
-
-// Função para formatar o arquivo com alguns usuários
-void FormatarArquivoLogin(const char *filename)
-{
-    FILE *file = fopen(filename, "wb");
-    if (file == NULL)
-    {
-        perror("Erro ao abrir o arquivo");
-        exit(1);
-    }
-
-    membroAcademico usuarios[3] = {
-        {"47735823109", "senha1", "Bruno", 1, "MateriaLP.bin"},
-        {"12345678901", "senha2", "Luciano", 2, "MateriaLP.bin"},
-        {"10987654321", "senha3", "Joao", 3, "MateriaLP.bin"}};
-
-    for (int i = 0; i < 3; i++)
-    {
-        EscreverUsuario(file, &usuarios[i]);
-    }
-
-    fclose(file);
 }
 
 void MostrarTodosOsAlunos(const char *nomeArquivo)
@@ -504,17 +435,177 @@ void RealizarChamada(char *materia)
     system("pause");
 }
 
+void FechamentoMateria(char *materia) {
+    int opcao;
+    char nomeAluno[50];
+    FILE *file;
+    Estudante aluno;
+
+    printf("Deseja exibir o relatório por:\n1 - Aluno\n2 - Disciplina\n");
+    scanf("%d", &opcao);
+    fflush(stdin);
+
+    if (opcao == 1) {
+        printf("Digite o nome do aluno: ");
+        scanf("%49s", nomeAluno);
+        fflush(stdin);
+
+        file = fopen(materia, "rb");
+        if (file == NULL) {
+            perror("Erro ao abrir o arquivo");
+            return;
+        }
+
+        int encontrado = 0;
+        while (LerArquivo(file, &aluno)) {
+            if (strcmp(aluno.nome, nomeAluno) == 0) {
+                encontrado = 1;
+                printf("\nAluno encontrado:\n");
+                printf("Nome: %s\n", aluno.nome);
+                printf("P1: %.2f\n", aluno.p1);
+                printf("P2: %.2f\n", aluno.p2);
+                printf("Media: %.2f\n", aluno.media);
+                printf("Faltas: %d\n", aluno.faltas);
+                printf("Situacao: %s\n", aluno.situ);
+                free(aluno.nome);
+                break;
+            }
+            free(aluno.nome);
+        }
+
+        if (!encontrado) {
+            printf("Aluno '%s' não encontrado no arquivo.\n", nomeAluno);
+        }
+
+        fclose(file);
+    } else if (opcao == 2) {
+        file = fopen(materia, "rb");
+        if (file == NULL) {
+            perror("Erro ao abrir o arquivo");
+            return;
+        }
+
+        printf("Relatório por disciplina:\n");
+
+        while (LerArquivo(file, &aluno)) {
+            printf("\nNome: %s\n", aluno.nome);
+            printf("P1: %.2f\n", aluno.p1);
+            printf("P2: %.2f\n", aluno.p2);
+            printf("Media: %.2f\n", aluno.media);
+            printf("Faltas: %d\n", aluno.faltas);
+            printf("Situacao: %s\n", aluno.situ);
+            free(aluno.nome);
+        }
+
+        fclose(file);
+    } else {
+        printf("Opção inválida.\n");
+    }
+}
+
+void Aluno(membroAcademico aluno)
+{
+    char opcao[100];   // Opção do menu
+    char escolha[100]; // Variável para armazenar a escolha de sair
+
+    // Laço do menu
+    do
+    {
+        // Exibe o menu
+        printf("\n\n-------------- Bem vindo %s! --------------\n\n", aluno.nome);
+        printf("--------- Digite a opcao desejada: --------------\n");
+        printf("------------------- 1 - Aviso -------------------\n");
+        printf("------------------- 2 - Notas -------------------\n");
+        printf("------------------- 3 - Faltas ------------------\n");
+        printf("------------------- 4 - Sair --------------------\n");
+        scanf("%s", opcao);
+        fflush(stdin);
+        system("cls");
+
+        // Verifica o comprimento da opção digitada
+        if (strlen(opcao) > 1)
+        {
+            opcao[0] = '5'; // Se o comprimento for maior que 1 define '5' para retornar uma opção inválida
+        }
+
+        // Trata a opção escolhida
+        switch (opcao[0])
+        {
+        case '1':
+            printf("Aviso será mostrado aqui!");
+            printf("\nPressione enter para continuar. . .");
+            fflush(stdin); // Limpa o buffer de entrada do teclado
+            getchar();     // Aguarda uma tecla ser pressionada antes de continuar
+            break;
+        case '2':
+            MostrarNotas(aluno.materia, aluno.nome); // Mostra as notas do aluno
+            printf("\nPressione enter para continuar. . .");
+            fflush(stdin); // Limpa o buffer de entrada do teclado
+            getchar();     // Aguarda uma tecla ser pressionada antes de continuar
+            break;
+        case '3':
+            MostrarFaltas(aluno.materia, aluno.nome); // Mostra as faltas do aluno
+            printf("\nPressione enter para continuar. . .");
+            fflush(stdin); // Limpa o buffer de entrada do teclado
+            getchar();     // Aguarda uma tecla ser pressionada antes de continuar
+            break;
+        case '4':
+            do
+            {
+                // Pergunta se deseja realmente sair
+                printf("Deseja realmente sair?\n1- Sim\n2- Nao\n");
+                scanf("%s", escolha);
+                fflush(stdin);
+                // Verifica o comprimento da escolha de saída
+                if (strlen(escolha) > 1)
+                {
+                    escolha[0] = '3'; // Se o comprimento for maior que 1, define '3' para retornar uma opção inválida
+                }
+                if (escolha[0] == '1')
+                {
+                    printf("\nSaindo. . .");
+                    fflush(stdin);  // Limpa o buffer de entrada do teclado
+                    getchar();      // Aguarda uma tecla ser pressionada antes de continuar
+                    opcao[0] = '4'; // Sai do menu
+                    break;
+                }
+                else if (escolha[0] == '2')
+                {
+                    opcao[0] = '5';
+                }
+                else
+                {
+                    printf("Opcao invalida\n");
+                    printf("Pressione enter para continuar. . .\n");
+                    fflush(stdin); // Limpa o buffer de entrada do teclado
+                    getchar();     // Aguarda uma tecla ser pressionada antes de continuar
+                }
+            } while (escolha[0] != '1' && escolha[0] != '2');
+            break;
+        default:
+            printf("Opcao Invalida\n");
+            printf("Pressione enter para continuar. . .\n");
+            fflush(stdin); // Limpa o buffer de entrada do teclado
+            getchar();     // Aguarda uma tecla ser pressionada antes de continuar
+            break;
+        }
+
+        if (opcao[0] != '4')
+        {
+            printf("Voltando ao menu...\n");
+            fflush(stdin); // Limpa o buffer de entrada do teclado
+            getchar();     // Aguarda uma tecla ser pressionada antes de continuar
+        }
+        system("cls"); // Limpa a tela (no Windows)
+    } while (opcao[0] != '4');
+}
+
 void Professor(membroAcademico professor)
 {
 
     int opcao;
     int sair;
     sair = 0;
-
-    printf("**************************************");
-    printf("\nBem vindo ao SIGA");
-    printf("\n**************************************");
-    printf("\n");
 
     printf("\nBem vindo(a), Prof. %s.\nO que deseja fazer hoje?", professor.nome);
 
@@ -545,7 +636,7 @@ void Professor(membroAcademico professor)
             system("cls");
             break;
         case 3:
-            printf("Fechamento\n");
+            FechamentoMateria(professor.materia);
             system("echo \"Pressione qualquer tecla para continuar\"");
             getchar();
             system("cls");
@@ -588,6 +679,10 @@ int main()
     char senha[10];
     membroAcademico usuarioEncontrado;
 
+    printf("\n**************************************\n");
+    printf("          Bem vindo ao SIGA!            ");
+    printf("\n**************************************\n");
+
     printf("Digite o CPF: ");
     scanf("%11s", cpf);
     printf("Digite a senha: ");
@@ -596,8 +691,6 @@ int main()
     // Verificar se o CPF e a senha correspondem
     if (VerificarCpfSenha(nomeArquivo, cpf, senha, &usuarioEncontrado))
     {
-        printf("CPF e senha correspondem!\n");
-        printf("Bem-vindo, %s!\n", usuarioEncontrado.nome);
         switch (usuarioEncontrado.privilegio)
         {
         case 1:
