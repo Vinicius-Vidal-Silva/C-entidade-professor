@@ -39,7 +39,7 @@ void ler_membros(){
     fread(membros_cad_vet, sizeof(memb_acad), num_membros, arquivo_membros_cad);
 
     for(int i = 0; i < num_membros; i++){
-        printf("nome: %s\nCPF: %ld\nSenha: %s\nPriv: %d\n\n", membros_cad_vet[i].nome, membros_cad_vet[i].CPF, membros_cad_vet[i].senha, membros_cad_vet[i].priv);
+        printf("nome: %s\nCPF: %s\nSenha: %s\nPriv: %d\n\n", membros_cad_vet[i].nome, membros_cad_vet[i].cpf, membros_cad_vet[i].senha, membros_cad_vet[i].priv);
     }
 }
 
