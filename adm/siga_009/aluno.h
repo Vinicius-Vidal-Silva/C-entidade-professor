@@ -4,7 +4,7 @@
 struct _aluno {
     char nome[48];
     long int cpf;
-    char senha;
+    char senha[8];
     int reg_a;
     char materias[3][24];
     int priv;
@@ -16,7 +16,7 @@ typedef struct _aluno aluno;
 void init_aluno(aluno *a) {
     char vazio[24] = "...";
     a->priv = 1;
-    a->reg_a = 100;
+    a->reg_a = 1000;
     for(int i = 0; i < 3; i++){
         strcpy(a->materias[i],vazio);
     }
