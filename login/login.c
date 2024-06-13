@@ -95,29 +95,48 @@ int main() {
     char cpf[12];
     char senha[10];
     int privilegio;
-
-    printf("Digite o CPF: ");
-    scanf("%11s", cpf);
-    printf("Digite a senha: ");
-    scanf("%9s", senha);
-
-    if (VerificarCpfSenha(nomeArquivo, cpf, senha, &privilegio)) {
-        printf("CPF e senha correspondem!\n");
-        if (privilegio == 1) {
-            printf("Você é Administrador.\n");
-            AbrirArquivoC("admin.c");
-        } else if (privilegio == 2) {
-            printf("Você é Professor.\n");
-            AbrirArquivoC("professor.c");
-        } else if (privilegio == 3) {
-            printf("Você é Aluno.\n");
-            AbrirArquivoC("aluno.c");
-        } else {
-            printf("Privilégio desconhecido.\n");
-        }
-    } else {
-        printf("CPF e/ou senha incorretos.\n");
-    }
-
+    int opcaoMenu;
+    int continuaMenu = 1;
+	do{
+		printf("[1] - Login\n");
+		printf("[2] - Sair\n");
+		scanf("%d", &opcaoMenu);
+		switch (opcaoMenu){
+			case 1:
+			    printf("Digite o CPF: ");
+			    scanf("%11s", cpf);
+			    printf("Digite a senha: ");
+			    scanf("%9s", senha);
+			    
+			
+			    if (VerificarCpfSenha(nomeArquivo, cpf, senha, &privilegio)) {
+			        printf("CPF e senha correspondem!\n");
+			        if (privilegio == 1) {
+			            printf("Você é Administrador.\n");
+			            AbrirArquivoC("admin.c");
+			        } else if (privilegio == 2) {
+			            printf("Você é Professor.\n");
+			            AbrirArquivoC("professor.c");
+			        } else if (privilegio == 3) {
+			            printf("Você é Aluno.\n");
+			            AbrirArquivoC("aluno.c");
+			        } else {
+			            printf("Privilégio desconhecido.\n");
+			        }
+			    } else {
+			        printf("CPF e/ou senha incorretos.\n");
+			    }
+			    break;
+			case 2:
+				continuaMenu = 0;
+				break;
+			default:
+				printf("Opcao invalida...");
+                getchar();
+                getchar();
+                break;
+		}
+		system("cls");
+	}while(continuaMenu);
     return 0;
 }
