@@ -2,7 +2,7 @@
 #include <stdlib.h> // Biblioteca padrão para funções de propósito geral, como alocação de memória.
 #include <string.h> // Biblioteca padrão para manipulação de strings.
 
-// Definição da estrutura do registro
+// Definição da estrutura do registro 
 typedef struct
 {
     char cpf[12];
