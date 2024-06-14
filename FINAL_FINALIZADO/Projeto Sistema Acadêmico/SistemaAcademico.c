@@ -810,12 +810,60 @@ void CadastrarUsuario(const char *nomeArquivo)
 
     // Declaração de uma variável para armazenar os dados do novo usuário
     membroAcademico novoUsuario;
-    printf("Digite o CPF: ");
-    // Lê o CPF do usuário, com no máximo 11 caracteres
-    scanf("%11s", novoUsuario.cpf);
-    printf("Digite a senha: ");
-    // Lê a senha do usuário, com no máximo 9 caracteres
-    scanf("%9s", novoUsuario.senha);
+
+    // Executado até que o CPF tenha tamanho igual a 11
+    // Como o CPF na struct possui tamanho 12 (11 caracteres + terminador de string, o qual não é contado pela srtlen),
+    // o CPF nunca teria tamanho maior que 11 uma vez que qualquer caracter além disso não seria armazenado.
+    // Para resolver isso é utilizado uma string temporária de tamanho maior para que seja possível identificar quando
+    // o tamanho do CPF inserido está alem do permitido.
+    do {
+        char cpf[13];
+
+        printf("Digite o CPF: ");
+        // Lê o CPF do usuário, com no máximo 11 caracteres
+        scanf("%s", cpf);
+
+        int cpfLength = strlen(cpf);
+        if (cpfLength != 11) {
+            printf("Um CPF válido conterá exatamente 11 números sem pontuação.\nExemplo: 12345678901\n");
+            
+            printf("\nPressione enter para continuar. . .");
+            fflush(stdin);
+            getchar();
+
+            system("cls");
+
+            continue;
+        }
+
+        strcpy(novoUsuario.cpf, cpf);
+
+        break;
+    } while (1);
+
+    do {
+        char senha[9];
+
+        printf("Digite a senha: ");
+        // Lê a senha do usuário, com no máximo 9 caracteres
+        scanf("%s", senha);
+
+        int senhaLength = strlen(senha);
+        if (senhaLength > 9) {
+            printf("A senha deve conter no máximo 9 caracteres.\n");
+            
+            printf("\nPressione enter para continuar. . .");
+            fflush(stdin);
+            getchar();
+
+            continue;
+        }
+
+        strcpy(novoUsuario.senha, senha);
+
+        break;
+    } while (1);
+
     printf("Digite o nome: ");
     // Lê o nome do usuário, com no máximo 49 caracteres
     scanf("%49s", novoUsuario.nome);
@@ -1167,85 +1215,85 @@ void Administrador(membroAcademico admin)
         // Trata a opção escolhida
         switch (opcao[0])
         {
-        case '1':
-            CadastrarUsuario("login.bin");
-            printf("\nPressione enter para continuar. . .");
-            fflush(stdin); // Limpa o buffer de entrada do teclado
-            getchar();     // Aguarda uma tecla ser pressionada antes de continuar
-            break;
-        case '2':
-            AlterarUsuario("login.bin", admin.cpf);
-            // Verifica se o usuário deve ser desconectado
-            if (userLoggedOut)
-            {
-                // Código para finalizar a sessão do usuário ou encerrar o programa
-                printf("Você alterou seu próprio privilégio. Será necessário fazer logout.\n");
-                fflush(stdin);  // Limpa o buffer de entrada do teclado
+            case '1':
+                CadastrarUsuario("login.bin");
+                printf("\nPressione enter para continuar. . .");
+                fflush(stdin); // Limpa o buffer de entrada do teclado
                 getchar();     // Aguarda uma tecla ser pressionada antes de continuar
-                system("cls");
-                return;
-            }
-            printf("\nPressione enter para continuar. . .");
-            fflush(stdin); // Limpa o buffer de entrada do teclado
-            getchar();     // Aguarda uma tecla ser pressionada antes de continuar
-            break;
-        case '3':
-            CadastrarMateria();
-            printf("\nPressione enter para continuar. . .");
-            fflush(stdin); // Limpa o buffer de entrada do teclado
-            getchar();     // Aguarda uma tecla ser pressionada antes de continuar
-            break;
-        case '4':
-            RegistrarAviso("avisos.txt");
-            printf("\nPressione enter para continuar. . .");
-            fflush(stdin); // Limpa o buffer de entrada do teclado
-            getchar();     // Aguarda uma tecla ser pressionada antes de continuar
-            break;
-        case '5':
-            ListarUsuarios("login.bin");
-            printf("\nPressione enter para continuar. . .");
-            fflush(stdin); // Limpa o buffer de entrada do teclado
-            getchar();     // Aguarda uma tecla ser pressionada antes de continuar
-            break;
-        case '6':
-            do
-            {
-                // Pergunta se deseja realmente sair
-                printf("Deseja realmente sair?\n1- Sim\n2- Nao\n");
-                scanf("%s", escolha);
-                fflush(stdin);
-                // Verifica o comprimento da escolha de saída
-                if (strlen(escolha) > 1)
+                break;
+            case '2':
+                AlterarUsuario("login.bin", admin.cpf);
+                // Verifica se o usuário deve ser desconectado
+                if (userLoggedOut)
                 {
-                    escolha[0] = '3'; // Se o comprimento for maior que 1, define '3' para retornar uma opção inválida
-                }
-                if (escolha[0] == '1')
-                {
-                    printf("\nSaindo. . .");
+                    // Código para finalizar a sessão do usuário ou encerrar o programa
+                    printf("Você alterou seu próprio privilégio. Será necessário fazer logout.\n");
                     fflush(stdin);  // Limpa o buffer de entrada do teclado
                     getchar();     // Aguarda uma tecla ser pressionada antes de continuar
                     system("cls");
-                    return; // Retorna ao início do main
+                    return;
                 }
-                else if (escolha[0] == '2')
+                printf("\nPressione enter para continuar. . .");
+                fflush(stdin); // Limpa o buffer de entrada do teclado
+                getchar();     // Aguarda uma tecla ser pressionada antes de continuar
+                break;
+            case '3':
+                CadastrarMateria();
+                printf("\nPressione enter para continuar. . .");
+                fflush(stdin); // Limpa o buffer de entrada do teclado
+                getchar();     // Aguarda uma tecla ser pressionada antes de continuar
+                break;
+            case '4':
+                RegistrarAviso("avisos.txt");
+                printf("\nPressione enter para continuar. . .");
+                fflush(stdin); // Limpa o buffer de entrada do teclado
+                getchar();     // Aguarda uma tecla ser pressionada antes de continuar
+                break;
+            case '5':
+                ListarUsuarios("login.bin");
+                printf("\nPressione enter para continuar. . .");
+                fflush(stdin); // Limpa o buffer de entrada do teclado
+                getchar();     // Aguarda uma tecla ser pressionada antes de continuar
+                break;
+            case '6':
+                do
                 {
-                    opcao[0] = '7';
-                }
-                else
-                {
-                    printf("Opcao invalida\n");
-                    printf("Pressione enter para continuar. . .\n");
-                    fflush(stdin); // Limpa o buffer de entrada do teclado
-                    getchar();     // Aguarda uma tecla ser pressionada antes de continuar
-                }
-            } while (escolha[0] != '1' && escolha[0] != '2');
-            break;
-        default:
-            printf("Opcao Invalida\n");
-            printf("Pressione enter para continuar. . .\n");
-            fflush(stdin); // Limpa o buffer de entrada do teclado
-            getchar();     // Aguarda uma tecla ser pressionada antes de continuar
-            break;
+                    // Pergunta se deseja realmente sair
+                    printf("Deseja realmente sair?\n1- Sim\n2- Nao\n");
+                    scanf("%s", escolha);
+                    fflush(stdin);
+                    /* // Verifica o comprimento da escolha de saída
+                    if (strlen(escolha) > 1)
+                    {
+                        escolha[0] = '3'; // Se o comprimento for maior que 1, define '3' para retornar uma opção inválida
+                    } */
+                    if (escolha[0] == '1')
+                    {
+                        printf("\nSaindo. . .");
+                        fflush(stdin);  // Limpa o buffer de entrada do teclado
+                        getchar();     // Aguarda uma tecla ser pressionada antes de continuar
+                        system("cls");
+                        return; // Retorna ao início do main
+                    }
+                    else if (escolha[0] == '2')
+                    {
+                        opcao[0] = '7';
+                    }
+                    else
+                    {
+                        printf("Opcao invalida\n");
+                        printf("Pressione enter para continuar. . .\n");
+                        fflush(stdin); // Limpa o buffer de entrada do teclado
+                        getchar();     // Aguarda uma tecla ser pressionada antes de continuar
+                    }
+                } while (escolha[0] != '1' && escolha[0] != '2');
+                break;
+            default:
+                printf("Opcao Invalida\n");
+                printf("Pressione enter para continuar. . .\n");
+                fflush(stdin); // Limpa o buffer de entrada do teclado
+                getchar();     // Aguarda uma tecla ser pressionada antes de continuar
+                break;
         }
 
         if (opcao[0] != '6')
